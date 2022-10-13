@@ -1,0 +1,13 @@
+name: softepigen
+version: 0.1.0
+
+authors:
+  - Francisco Adasme <francisco.adasme@gmail.com>
+
+targets:
+  softepigen:
+    main: src/softepigen.cr
+
+crystal: 1.6.0
+
+license: MIT
