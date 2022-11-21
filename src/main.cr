@@ -1,4 +1,5 @@
 require "csv"
+require "option_parser"
 require "./softepigen"
 
 REPEAT_SIZE = 5
@@ -9,8 +10,36 @@ minamplicon = 100
 maxamplicon = 150
 mincpg = 3
 maxcpg = 40
+parser = OptionParser.parse do |parser|
+  parser.banner = "Usage: softepigen [-a=N,M] [-p=N,M] [-c=N,M] FASTA"
+  parser.on(
+    "-a=N,M", "--amplicon=N,M",
+    "Amplicon size from N to M. Defaults to #{minamplicon..maxamplicon}") do |str|
+    str =~ /^\d+(,|-|..)\d+$/ || abort "error: Invalid amplicon size #{str.inspect}"
+    minamplicon, maxamplicon = str.split($~[1]).map &.to_i
+  end
+  parser.on(
+    "-p=N,M", "--primer=N,M",
+    "Primer size from N to M. Defaults to #{minlength..maxlength}") do |str|
+    str =~ /^\d+(,|-|..)\d+$/ || abort "error: Invalid primer size #{str.inspect}"
+    minlength, maxlength = str.split($~[1]).map &.to_i
+  end
+  parser.on(
+    "-c=N,M", "--cpg=N,M",
+    "Number of CpG from N to M. Defaults to #{mincpg..maxcpg}") do |str|
+    str =~ /^\d+(,|-|..)\d+$/ || abort "error: Invalid number of CpG #{str.inspect}"
+    mincpg, maxcpg = str.split($~[1]).map &.to_i
+  end
+  parser.on("-h", "--help", "Show this help") do
+    puts parser
+    exit
+  end
+  parser.invalid_option do |flag|
+    abort "error: #{flag} is not a valid option\n#{parser}"
+  end
+end
 
-path = ARGV[0]? || abort "error: Missing input FASTA file"
+path = ARGV[0]? || abort "error: Missing input FASTA file\n#{parser}"
 abort "error: FASTA file not found" unless File.exists?(path)
 
 File.open(path) do |fasta|
