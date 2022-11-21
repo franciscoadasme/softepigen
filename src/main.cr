@@ -4,29 +4,26 @@ require "./softepigen"
 
 REPEAT_SIZE = 5
 
-minlength = 15
-maxlength = 25
-minamplicon = 100
-maxamplicon = 150
-mincpg = 3
-maxcpg = 40
+primer_size = 15..25
+amplicon_size = 100..150
+allowed_cpg = 3..40
 parser = OptionParser.parse do |parser|
   parser.banner = "Usage: softepigen [-a=N,M] [-p=N,M] [-c=N,M] FASTA"
   parser.on(
     "-a=N,M", "--amplicon=N,M",
-    "Amplicon size from N to M. Defaults to #{minamplicon..maxamplicon}") do |str|
+    "Amplicon size from N to M. Defaults to #{amplicon_size}") do |str|
     str =~ /^\d+(,|-|..)\d+$/ || abort "error: Invalid amplicon size #{str.inspect}"
     minamplicon, maxamplicon = str.split($~[1]).map &.to_i
   end
   parser.on(
     "-p=N,M", "--primer=N,M",
-    "Primer size from N to M. Defaults to #{minlength..maxlength}") do |str|
+    "Primer size from N to M. Defaults to #{primer_size}") do |str|
     str =~ /^\d+(,|-|..)\d+$/ || abort "error: Invalid primer size #{str.inspect}"
     minlength, maxlength = str.split($~[1]).map &.to_i
   end
   parser.on(
     "-c=N,M", "--cpg=N,M",
-    "Number of CpG from N to M. Defaults to #{mincpg..maxcpg}") do |str|
+    "Number of CpG from N to M. Defaults to #{allowed_cpg}") do |str|
     str =~ /^\d+(,|-|..)\d+$/ || abort "error: Invalid number of CpG #{str.inspect}"
     mincpg, maxcpg = str.split($~[1]).map &.to_i
   end
@@ -51,7 +48,7 @@ File.open(path) do |fasta|
 
     seq = Softepigen::Region.new(fasta.read_line)
     regions = seq.split_by_cpg
-    regions.select! &.size.>=(minlength + 2) # includes CG
+    regions.select! &.size.>=(primer_size.begin + 2) # includes CG
 
     downstream_primers = [] of Softepigen::Region # 5' to 3'
     upstream_primers = [] of Softepigen::Region   # 3' to 5'
@@ -59,7 +56,7 @@ File.open(path) do |fasta|
       complex_idxs = region.complexity
 
       region.each_downstream(complex_idxs) do |subregion|
-        next unless subregion.size <= maxlength
+        next unless subregion.size.in?(primer_size)
         next if subregion.has_repeats?(REPEAT_SIZE)
         if subregion.stop - 4 >= 0
           4.downto(1) do |i|
@@ -71,7 +68,7 @@ File.open(path) do |fasta|
       end
 
       region.each_upstream(complex_idxs) do |subregion|
-        next unless subregion.size <= maxlength
+        next unless subregion.size.in?(primer_size)
         upstream_primers << subregion unless subregion.has_repeats?(REPEAT_SIZE)
         if subregion.stop + 4 < seq.size
           1.upto(4) do |i|
@@ -92,10 +89,10 @@ File.open(path) do |fasta|
         upstream_primers.each do |usr|
           distance = usr.stop - dsr.start
           amplicon = seq[dsr.start..usr.stop]
-          dpg_count = 0
-          amplicon.each_cpg { dpg_count += 1 }
-          next unless minamplicon <= distance <= maxamplicon &&
-                      mincpg <= dpg_count <= maxcpg
+          cpg_count = 0
+          amplicon.each_cpg { cpg_count += 1 }
+          next unless distance.in?(amplicon_size) && cpg_count.in?(allowed_cpg)
+
           csv << dsr.start + 1 << ',' << dsr.size << ','
           dsr[...-dsr.padding].to_s(csv, replacing: {'C' => 'T'})    # output C=>T before CG
           dsr[-dsr.padding..-dsr.padding + 1].to_s(csv)              # output CG intact
@@ -106,7 +103,7 @@ File.open(path) do |fasta|
           usr[-usr.padding - 3..-usr.padding - 2].to_s(csv, complement: true)          # output complement CG intact
           usr[..-usr.padding - 4].to_s(csv, complement: true, replacing: {'C' => 'T'}) # output C=>T after CG
           csv << ','
-          csv << distance << ',' << dpg_count
+          csv << distance << ',' << cpg_count
           csv.puts
         end
       end
