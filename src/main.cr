@@ -88,10 +88,15 @@ File.open(path) do |fasta|
       downstream_primers.each do |dsr|
         upstream_primers.each do |usr|
           distance = usr.stop - dsr.start
+          # next upstream primers will produce an amplicon too large so stop
+          break unless distance <= amplicon_size.end
+          # skip if upstream primer is before downstream primer
+          next unless distance >= amplicon_size.begin
+
           amplicon = seq[dsr.start..usr.stop]
           cpg_count = 0
           amplicon.each_cpg { cpg_count += 1 }
-          next unless distance.in?(amplicon_size) && cpg_count.in?(allowed_cpg)
+          next unless cpg_count.in?(allowed_cpg)
 
           csv << dsr.start + 1 << ',' << dsr.size << ','
           dsr[...-dsr.padding].to_s(csv, replacing: {'C' => 'T'})    # output C=>T before CG
