@@ -48,7 +48,7 @@ File.open(path) do |fasta|
 
     seq = Softepigen::Region.new(fasta.read_line)
     regions = seq.split_by_cpg
-    regions.select! &.size.>=(primer_size.begin + 2) # includes CG
+    regions.select! &.size.>=(primer_size.begin)
 
     downstream_primers = [] of Softepigen::Region # 5' to 3'
     upstream_primers = [] of Softepigen::Region   # 3' to 5'
