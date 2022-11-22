@@ -94,13 +94,18 @@ File.open(path) do |fasta|
        "AMPLICON SIZE", "NUMBERCpG"}.join csv, ','
       csv.puts
 
+      offset = 0
       downstream_primers.each do |dsr|
-        upstream_primers.each do |usr|
+        upstream_primers.each(within: offset..) do |usr|
           distance = usr.stop - dsr.start
-          # next upstream primers will produce an amplicon too large so stop
-          break unless distance <= amplicon_size.end
-          # skip if upstream primer is before downstream primer
-          next unless distance >= amplicon_size.begin
+          if distance < amplicon_size.begin
+            # skip if upstream primer is before downstream primer
+            offset += 1
+            next
+          elsif distance > amplicon_size.end
+            # next upstream primers will produce an amplicon too large so stop
+            break
+          end
 
           amplicon = seq[dsr.start..usr.stop]
           cpg_count = 0
