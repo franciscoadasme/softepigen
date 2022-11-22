@@ -105,6 +105,131 @@ describe Softepigen::Region do
           actual.should eq expected
         end
     end
+
+    it "works with k=5" do
+      seq("CGTATTTTAAAGAGAAAATATTTTAAATTTTTATATTAGTTATTTTTATGG")
+        .complexity(k: 5).should be_empty
+      seq("CGATTTTTAATATTTTAATGTAGTATTTTTTAATTTTTTTTGGGTATTTATGTATAAATTGTAATAAA\
+           ATTGGGTTTTTATTGTATA").complexity(k: 5).should be_empty
+      seq("CGTTGTTTGTTGGTTTTTAAATAAAATTGGGTTTTTATTATATATGTTGTTTGTTGGTTTTTTAAATT\
+           ATTTTGTGTTTTTTTATAGTATTAAAGTTTTTTAAAAATATGATTTTAAATTATAATTTAGTATTTTG\
+           AATATAATA").complexity(k: 5).should be_empty
+      seq("CGTTTTATTATTTTTTTGTTTGGGAGTATATGGATTGTTTTTAATTTTGTT")
+        .complexity(k: 5).should eq [23]
+      seq("CGATTATATGTAGTATTGAAATGGATATTTTGGTAGATAAATTTTTGA")
+        .complexity(k: 5).should eq [32, 34]
+      seq("CGATTGTTTTAGGATAAGTTTTTAAAAGGGAAATGAAGTGTATTTTTTTAGTGTATTTTTTGAGATAT\
+           TTTTTTTATAGTTAGGTTTATAGTTATTTAAAGTTGTTAGTTGTAGGTTTTATGTTTGTTGTTTTTAA\
+           AGTGTA").complexity(k: 5).should eq [61, 62]
+      seq("CGTATAAGTGTTTATTATATAAATTTTGTTGGAGGTAGTTGTGTTTTGGTAGTTTAATTTG")
+        .complexity(k: 5).should be_empty
+      seq("CGGATTTTTAATTAGATGGTTTTAATAAGGTAGA").complexity(k: 5).should eq [13, 29]
+      seq("CGTAAAAAAATAAATAAATAAAATAAAATAAAGGGTTTTTTTTTTGTAAATAGTTGTATTTATTTAAA\
+           AGAAGGTTTTTATTTTTTTAATAGTATTTGTGGGTTTAGAAGTTGGTAAAGTTAGTATTGGTTTGAGA\
+           GTTTTGAGTGATTAGTGGTTGGGGT").complexity(k: 5).should eq [141, 142]
+      seq("CGGTTATATGATATTTTTTTAGT").complexity(k: 5).should be_empty
+      seq("CGGGTTTTGGGAGTTTATTTT").complexity(k: 5).should be_empty
+      seq("CGTATAGGTTAGGAAGTAGTG").complexity(k: 5).should be_empty
+      seq("CGTATAGTTATTATTTTAGGAGAAT").complexity(k: 5).should be_empty
+      seq("CGATTTTGATTTTTTAAAATTTTTAGTAGTTATAGTATAGTGAGAAAAATAATAGT")
+        .complexity(k: 5).should eq [38, 39]
+      seq("CGTAGTTGTTTGTTTTTAATA").complexity(k: 5).should be_empty
+      seq("CGTATTAGATTTTGAAAAATATATT").complexity(k: 5).should be_empty
+      seq("CGGAGGTAAAATAATTTGTTTTAGAGAAGTT").complexity(k: 5).should be_empty
+      seq("CGGGGGGATAGGGATAAGGTAATTATTTTAGTAAGTGTAGTTTTTTTTTTTTA")
+        .complexity(k: 5).should eq [6]
+      seq("CGAGGGTTAGTTTATTTATTG").complexity(k: 5).should be_empty
+      seq("CGGAGGGATAGGAATAAGGATAGGGATAAGGTAATTATTTTATTTAGTGTAGTTTTTTTTTTTTA")
+        .complexity(k: 5).should eq [6, 18]
+      seq("CGTTTTTTTTTAGGGTTAGTTTATTTATTGTGGAGGGATAGGGATAAGGATAGGGATAAGGTAATTAT\
+           TTTATTTAGTGTAGTTTTTTTTTTTTA").complexity(k: 5).should eq [36, 48]
+      seq("CGTTTTTTTTTAGGGTTAGTT").complexity(k: 5).should be_empty
+      seq("CGTTTATTGTGGAGGGATAGGGATAAGGATAGGGATAAGGTAATTATTTTTAGTAAGTG")
+        .complexity(k: 5).should eq [15, 27]
+      seq("CGTTTTTTTTTAGGGTTAGTTTATTTATTGTGGAGGGATAGGGATAAGGATAGGGATAAGGTAATTAT\
+           TTTTAGTAAGTG").complexity(k: 5).should eq [36, 48]
+      seq("CGTTTTTTTTTAGGGTTAGTTTATTTATTG").complexity(k: 5).should be_empty
+      seq("CGGAGGGATAGGGATAGGGATAAGGTAATTATTTTAGTAAGTG")
+        .complexity(k: 5).should eq [6, 12]
+      seq("CGGTTTTTTTTTTTTTTAGGGTTGTGAT").complexity(k: 5).should be_empty
+      seq("CGTTTTTTATTTTATATTTTGGTATTTTTATTTTTT").complexity(k: 5).should be_empty
+      seq("CGATTTTGTTTTAGGGATA").complexity(k: 5).should be_empty
+      seq("CGTTTATTGATATAATTGAGGTTTTAGATTTTTAGGGTGTGGTA")
+        .complexity(k: 5).should be_empty
+      seq("CGTTTTTATTTAGTTATAGGGTT").complexity(k: 5).should be_empty
+      seq("CGAGTTTTTGAGATTAGTAGATATGTTTGGTTGGGGA")
+        .complexity(k: 5).should eq [9, 16, 18]
+      seq("CGTATTTTTAAGAGTATAGTTATATTGTGATTTT").complexity(k: 5).should eq [11]
+      seq("CGATTGTGATAAAGGGGGTT").complexity(k: 5).should be_empty
+      seq("CGGGTATGAGGGTGTAGGTGTT").complexity(k: 5).should eq [5]
+      seq("CGGGTGAGATTATTTTTATGGTGAGAATAAAGGAAATGATGTAGGGTGAATAGTGGGAAGGAGG")
+        .complexity(k: 5).should eq [3, 5, 20]
+      seq("CGGAGGGGTTGGGGGAAGT").complexity(k: 5).should be_empty
+      seq("CGTTGTGTTTAGGATATTTA").complexity(k: 5).should be_empty
+      seq("CGGTTATAGAGAGAGGGTTTAAGTGTATTTTTTATATTAGGGGTGGTTGGTGTTTTTTGAGT")
+        .complexity(k: 5).should eq [5]
+      seq("CGATGTTTAGAATGAAATGTA").complexity(k: 5).should be_empty
+      seq("CGGTTAAGAGTGGTAGAAT").complexity(k: 5).should eq [7, 12]
+      seq("CGTAGATTGAGGAGGGGTAATAAATGGTGGT").complexity(k: 5).should be_empty
+      seq("CGTTTGGATAGGTATGTTTGTTATGTAGTGTTATTTTAGTAATATATAA")
+        .complexity(k: 5).should eq [6]
+      seq("CGGATAAAAATGGTATTTGGTTGATAAAATTTTAATTTTGATTTTAATGTTTAGAATTATTTAGTTTG\
+           ATTTTTTATTTGTGGTGGAAAGGTTAAAAGATTAGA").complexity(k: 5).should be_empty
+      seq("CGAGGGAGGTAAATAGGAGATATAAGAGGTAAGTAAAATTTATTTTTTTTTTTTTTTAGGTGTTAGAG\
+           GAAGTATTT").complexity(k: 5).should eq [16, 17]
+      seq("CGTGGAGAGGGTTTGGAGGTTT").complexity(k: 5).should be_empty
+      seq("CGTTTGTAGGGTTGGAAGAGAGGTTTTATTTTAAGTGTTAAATTTGAGTTGG")
+        .complexity(k: 5).should be_empty
+      seq("CGTTTAGAGGGTTGGGTTGAAAAGGGGTTGGAGGTTGTTTTTAGTTTT")
+        .complexity(k: 5).should be_empty
+      seq("CGTAGGAAAGTATGTTGTGATTTGTTAGTTA").complexity(k: 5).should be_empty
+      seq("CGGTTGTATATTTGTTGTTGTAGAGTGTGTTATTTTATTGGG")
+        .complexity(k: 5).should eq [19, 22]
+      seq("CGTTGTGTTTAGGTTAGGG").complexity(k: 5).should be_empty
+      seq("CGATAGGGAGGAGATGGGGTTTAGAGGAGGGAAAAGAAGTTGGGATAAATATAAAAGAATATTTGTTAT")
+        .complexity(k: 5).should eq [10, 11]
+      seq("CGAAGATATTGTGTGGGAGTTTTT").complexity(k: 5).should eq [3]
+      seq("CGTTTAATATAAGGTATTAATATT").complexity(k: 5).should be_empty
+      seq("CGAGGGGATTTTTAGTAATAGTTTTGATATTTGTTTTGTTATTATGATA")
+        .complexity(k: 5).should be_empty
+      seq("CGAGGAGGGTAGTAAGATAAGGTGAGTTTAGA").complexity(k: 5).should eq [14, 21]
+      seq("CGTTAATATTTTTTTTATTTGTTAGG").complexity(k: 5).should be_empty
+      seq("CGTTGGGAGGATTAAAGATTTAGAGAGGGAGTTTTAAAGGTTTGTTTAAA")
+        .complexity(k: 5).should be_empty
+      seq("CGTTTAAAGAATTATTTATT").complexity(k: 5).should be_empty
+      seq("CGTTGTAGGTTGATTATGTATTAAG").complexity(k: 5).should be_empty
+      seq("CGAGTGGATTTTAGAGTTGAAGTAGGAGTTT").complexity(k: 5).should be_empty
+      seq("CGGGGAAATTAGTGTTTGATAAATTTTTTTTAAATTTTAT").complexity(k: 5).should be_empty
+      seq("CGGGTATTTTGTTAGGTTTGTTTGTT").complexity(k: 5).should be_empty
+      seq("CGGTTTTTTTTTTTTTTAGTTT").complexity(k: 5).should be_empty
+      seq("CGATGTTTTTTTTTTTTTGTTTAGAT").complexity(k: 5).should be_empty
+      seq("CGTGGTAAATTTTTTTTATTTGTTTTGGAATTTGTTGGGGTTTTT")
+        .complexity(k: 5).should be_empty
+      seq("CGTATAGTTAGAGAGATTATTTTTATAGTTTAGGTTAGGT").complexity(k: 5).should eq [12]
+      seq("CGTGTGATTTTTTTGTTTAGAAATTTT").complexity(k: 5).should be_empty
+      seq("CGGTGGTTTTTTATTATTAAGGAAATAAGTTTTAGTTGTTTTTAAGGT")
+        .complexity(k: 5).should be_empty
+      seq("CGTTTATGATTTGGTATAAATTATTTTTGTATTTTGTTAGTTATTTTTTTGTAAAATTGGTGTTTTAG\
+           TTATTAGGATTTTGAGGTATTGTAGT").complexity(k: 5).should be_empty
+      seq("CGGTATTTTTTTATTTGGAA").complexity(k: 5).should be_empty
+      seq("CGTTGTTTATTTTTTTTATTTGGGGGTGGTTTAGTATTATTTTTTTTGGGAATTTTTTAGTTTTTTTT\
+           ATTAGGTTTTTATT").complexity(k: 5).should be_empty
+      seq("CGGGGGTATTTATTTGTTATTT").complexity(k: 5).should be_empty
+      seq("CGATGTTTAGATATGGTGGGTTTAGTATTTTTTTAGGGGATTAATTTAAT")
+        .complexity(k: 5).should eq [8]
+      seq("CGTTAAGAGTTTGTTATTTATTGGAATTA").complexity(k: 5).should be_empty
+      seq("CGTATTAATAATTTTTTTTTTTGAGATAGGGTTTTGTTT").complexity(k: 5)
+        .should eq [22, 23, 24]
+      seq("CGTTGTTTAGGTTGGAGTGTAGTGGTATAGTTATAGTTTATTGTAGTTTTTAATTTTT")
+        .complexity(k: 5).should eq [14]
+      seq("CGTATTAGTTTTTTAAGT").complexity(k: 5).should be_empty
+      seq("CGTTTGGTTAATTTTTTAATTTTTTGGTAAAGATAGGGTTTTGTTTTGTTGTTTAGGTTGGTTTTAAA\
+           TTTTTGGGTTTAAATGATTTTTTTGTTTTAGTTTTTTAAGTAGTTGGGATTATGGGAGTA")
+        .complexity(k: 5).should eq [30, 31, 123]
+      seq("CGATATTTAGTTTGTTAATAAAATTTTATTTTAAAAAT").complexity(k: 5).should be_empty
+      seq("CGGTATAAGGTTTAGTTT").complexity(k: 5).should be_empty
+      seq("CGTTGGTTTTTTTAATTTGTT").complexity(k: 5).should be_empty
+    end
   end
 
   describe "#forward" do
