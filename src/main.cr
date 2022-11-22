@@ -7,6 +7,7 @@ REPEAT_SIZE = 5
 primer_size = 15..25
 amplicon_size = 100..150
 allowed_cpg = 3..40
+kmer = 4
 parser = OptionParser.parse do |parser|
   parser.banner = "Usage: softepigen [-a=N,M] [-p=N,M] [-c=N,M] FASTA"
   parser.on(
@@ -27,6 +28,15 @@ parser = OptionParser.parse do |parser|
     str =~ /^\d+(,|-|..)\d+$/ || abort "error: Invalid number of CpG #{str.inspect}"
     mincpg, maxcpg = str.split($~[1]).map &.to_i
   end
+  parser.on(
+    "-a={0,1}", "--astringency={0,1}",
+    "Astringency for complexity analysis. Defaults to 0.") do |str|
+    kmers = case str
+            when "0" then 4
+            when "1" then 5
+            else          abort "error: Invalid astringency #{str.inspect}"
+            end
+  end
   parser.on("-h", "--help", "Show this help") do
     puts parser
     exit
@@ -38,7 +48,6 @@ end
 
 path = ARGV[0]? || abort "error: Missing input FASTA file\n#{parser}"
 abort "error: FASTA file not found" unless File.exists?(path)
-
 File.open(path) do |fasta|
   fasta.each_line do |line|
     next unless line.starts_with?('>')
@@ -53,7 +62,7 @@ File.open(path) do |fasta|
     downstream_primers = [] of Softepigen::Region # 5' to 3'
     upstream_primers = [] of Softepigen::Region   # 3' to 5'
     regions.each do |region|
-      complex_idxs = region.complexity
+      complex_idxs = region.complexity kmer
 
       region.each_downstream(complex_idxs) do |subregion|
         next unless subregion.size.in?(primer_size)
