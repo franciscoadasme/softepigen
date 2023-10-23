@@ -14,9 +14,9 @@ def write_bedgraph(
   amplicons.each do |amplicon|
     io << name
     io << '\t'
-    io << amplicon.downstream_primer.start
+    io << amplicon.forward_primer.start
     io << '\t'
-    io << amplicon.upstream_primer.stop
+    io << amplicon.reverse_primer.stop
     io << '\t'
     io << amplicon.size
     io.puts
@@ -101,9 +101,9 @@ File.open(path) do |fasta|
     puts "Processing #{name}..."
 
     seq = Softepigen::Region.new fasta.read_line
-    downstream_primers, upstream_primers = Softepigen.find_primers(seq, primer_size, kmer)
+    forward_primers, reverse_primers = Softepigen.find_primers(seq, primer_size, kmer)
     amplicons = Softepigen.generate_amplicons(
-      downstream_primers, upstream_primers, amplicon_size, allowed_cpg)
+      forward_primers, reverse_primers, amplicon_size, allowed_cpg)
 
     File.open("#{name}-out.csv", "w") do |io|
       write_csv io, amplicons

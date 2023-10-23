@@ -233,7 +233,7 @@ describe Softepigen::Region do
   end
 
   describe "#forward" do
-    it "returns primers downstream" do
+    it "returns forward primers" do
       test_seq[0..48].forward.should be_empty
       test_seq[49..135].forward.should be_empty
       test_seq[136..280].forward.map { |r| {r.start, r.size} }.should eq [
@@ -355,7 +355,7 @@ describe Softepigen::Region do
   end
 
   describe "#reverse" do
-    it "returns primers upstream" do
+    it "returns reverse primers" do
       test_seq[0..48].reverse.should be_empty
       test_seq[49..135].reverse.map { |r| {r.start, r.size} }.should eq [
         {59, 79}, {87, 51}, {88, 50},

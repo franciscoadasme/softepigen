@@ -23,8 +23,8 @@ module Softepigen
     regions = seq.split_by_cpg
     regions.select! &.size.>=(primer_size.begin)
 
-    downstream_primers = [] of Region # 5' to 3'
-    upstream_primers = [] of Region   # 3' to 5'
+    forward_primers = [] of Region # 5' to 3'
+    reverse_primers = [] of Region # 3' to 5'
     regions.each do |region|
       complex_idxs = region.complexity(kmer)
 
@@ -34,43 +34,43 @@ module Softepigen
         if subregion.stop - 4 >= 0
           4.downto(1) do |i|
             other = subregion.unsafe_upstream_expand(i)
-            downstream_primers << other unless other.has_repeats?(REPEAT_SIZE)
+            forward_primers << other unless other.has_repeats?(REPEAT_SIZE)
           end
         end
-        downstream_primers << subregion
+        forward_primers << subregion
       end
 
       region.each_upstream(complex_idxs) do |subregion|
         next unless subregion.size.in?(primer_size)
-        upstream_primers << subregion unless subregion.has_repeats?(REPEAT_SIZE)
+        reverse_primers << subregion unless subregion.has_repeats?(REPEAT_SIZE)
         if subregion.stop + 4 < seq.size
           1.upto(4) do |i|
             other = subregion.unsafe_downstream_expand(i)
-            upstream_primers << other unless other.has_repeats?(REPEAT_SIZE)
+            reverse_primers << other unless other.has_repeats?(REPEAT_SIZE)
           end
         end
       end
     end
-    {downstream_primers, upstream_primers}
+    {forward_primers, reverse_primers}
   end
 
   def self.generate_amplicons(
-    downstream_primers : Array(Region),
-    upstream_primers : Array(Region),
+    forward_primers : Array(Region),
+    reverse_primers : Array(Region),
     amplicon_size : Range(Int, Int),
     allowed_cpg : Range(Int, Int)
   ) : Array(Amplicon)
     amplicons = [] of Amplicon
     offset = 0
-    downstream_primers.each do |dsr|
-      upstream_primers.each(within: offset..) do |usr|
+    forward_primers.each do |dsr|
+      reverse_primers.each(within: offset..) do |usr|
         distance = usr.stop - dsr.start
         if distance < amplicon_size.begin
-          # skip if upstream primer is before downstream primer
+          # skip if reverse primer is before forward primer
           offset += 1
           next
         elsif distance > amplicon_size.end
-          # next upstream primers will produce an amplicon too large so stop
+          # next reverse primers will produce an amplicon too large so stop
           break
         end
 
