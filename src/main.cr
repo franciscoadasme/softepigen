@@ -15,27 +15,30 @@ parser = OptionParser.parse do |parser|
     "Amplicon size from N to M. Defaults to #{amplicon_size}") do |str|
     str =~ /^\d+(,|-|..)\d+$/ || abort "error: Invalid amplicon size #{str.inspect}"
     minamplicon, maxamplicon = str.split($~[1]).map &.to_i
+    amplicon_size = minamplicon..maxamplicon
   end
   parser.on(
     "-p=N,M", "--primer=N,M",
     "Primer size from N to M. Defaults to #{primer_size}") do |str|
     str =~ /^\d+(,|-|..)\d+$/ || abort "error: Invalid primer size #{str.inspect}"
     minlength, maxlength = str.split($~[1]).map &.to_i
+    primer_size = minlength..maxlength
   end
   parser.on(
     "-c=N,M", "--cpg=N,M",
     "Number of CpG from N to M. Defaults to #{allowed_cpg}") do |str|
     str =~ /^\d+(,|-|..)\d+$/ || abort "error: Invalid number of CpG #{str.inspect}"
     mincpg, maxcpg = str.split($~[1]).map &.to_i
+    allowed_cpg = mincpg..maxcpg
   end
   parser.on(
     "-a={0,1}", "--astringency={0,1}",
     "Astringency for complexity analysis. Defaults to 0.") do |str|
-    kmers = case str
-            when "0" then 4
-            when "1" then 5
-            else          abort "error: Invalid astringency #{str.inspect}"
-            end
+    kmer = case str
+           when "0" then 4
+           when "1" then 5
+           else          abort "error: Invalid astringency #{str.inspect}"
+           end
   end
   parser.on("-h", "--help", "Show this help") do
     puts parser
