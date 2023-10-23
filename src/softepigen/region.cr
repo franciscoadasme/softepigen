@@ -156,6 +156,10 @@ struct Softepigen::Region
     end
   end
 
+  def to_unsafe : Pointer(UInt8)
+    @buffer.to_unsafe
+  end
+
   # WARN: potentially dangerous (no bounds check)
   def unsafe_downstream_expand(count : Int) : self
     raise ArgumentError.new("Negative count") if count.negative?
