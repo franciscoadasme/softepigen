@@ -2,7 +2,7 @@ require "./softepigen/**"
 
 # TODO: Write documentation for `Softepigen`
 module Softepigen
-  VERSION = "0.1.0"
+  VERSION = {{ `shards version "#{__DIR__}"`.chomp.stringify }}
 
   KMERS = {
     4 => %w(
