@@ -60,6 +60,8 @@ File.open(path) do |fasta|
 
     seq = Softepigen::Region.new fasta.read_line
     downstream_primers, upstream_primers = Softepigen.find_primers(seq, primer_size, kmer)
+    amplicons = Softepigen.generate_amplicons(
+      downstream_primers, upstream_primers, amplicon_size, allowed_cpg)
 
     File.open("#{name}-out.csv", "w") do |csv|
       {"FORWARD POSITION", "LENGTH IN BP", "FORWARD PRIMER",
@@ -67,37 +69,20 @@ File.open(path) do |fasta|
        "AMPLICON SIZE", "NUMBERCpG"}.join csv, ','
       csv.puts
 
-      offset = 0
-      downstream_primers.each do |dsr|
-        upstream_primers.each(within: offset..) do |usr|
-          distance = usr.stop - dsr.start
-          if distance < amplicon_size.begin
-            # skip if upstream primer is before downstream primer
-            offset += 1
-            next
-          elsif distance > amplicon_size.end
-            # next upstream primers will produce an amplicon too large so stop
-            break
-          end
-
-          amplicon = seq[dsr.start..usr.stop]
-          cpg_count = 0
-          amplicon.each_cpg { cpg_count += 1 }
-          next unless cpg_count.in?(allowed_cpg)
-
-          csv << dsr.start + 1 << ',' << dsr.size << ','
-          dsr[...-dsr.padding].to_s(csv, replacing: {'C' => 'T'})    # output C=>T before CG
-          dsr[-dsr.padding..-dsr.padding + 1].to_s(csv)              # output CG intact
-          dsr[-dsr.padding + 2..].to_s(csv, replacing: {'C' => 'T'}) # output C=>T after CG
-          csv << ','
-          csv << usr.start + 1 << ',' << usr.size << ','
-          usr[-usr.padding - 1..].to_s(csv, complement: true, replacing: {'C' => 'T'}) # output C=>T before CG
-          usr[-usr.padding - 3..-usr.padding - 2].to_s(csv, complement: true)          # output complement CG intact
-          usr[..-usr.padding - 4].to_s(csv, complement: true, replacing: {'C' => 'T'}) # output C=>T after CG
-          csv << ','
-          csv << distance << ',' << cpg_count
-          csv.puts
-        end
+      amplicons.each do |amplicon|
+        dsr, usr = amplicon.primers
+        csv << dsr.start + 1 << ',' << dsr.size << ','
+        dsr[...-dsr.padding].to_s(csv, replacing: {'C' => 'T'})    # output C=>T before CG
+        dsr[-dsr.padding..-dsr.padding + 1].to_s(csv)              # output CG intact
+        dsr[-dsr.padding + 2..].to_s(csv, replacing: {'C' => 'T'}) # output C=>T after CG
+        csv << ','
+        csv << usr.start + 1 << ',' << usr.size << ','
+        usr[-usr.padding - 1..].to_s(csv, complement: true, replacing: {'C' => 'T'}) # output C=>T before CG
+        usr[-usr.padding - 3..-usr.padding - 2].to_s(csv, complement: true)          # output complement CG intact
+        usr[..-usr.padding - 4].to_s(csv, complement: true, replacing: {'C' => 'T'}) # output C=>T after CG
+        csv << ','
+        csv << amplicon.size - 1 << ',' << amplicon.cpg_count
+        csv.puts
       end
     end
   end
