@@ -4,6 +4,29 @@ require "./softepigen"
 
 REPEAT_SIZE = 5
 
+def write_csv(io : IO, amplicons : Array(Softepigen::Amplicon)) : Nil
+  {"FORWARD POSITION", "LENGTH IN BP", "FORWARD PRIMER",
+   "REVERSE POSITION", "LENGTH IN BP", "REVERSE PRIMER",
+   "AMPLICON SIZE", "NUMBERCpG"}.join io, ','
+  io.puts
+
+  amplicons.each do |amplicon|
+    dsr, usr = amplicon.primers
+    io << dsr.start + 1 << ',' << dsr.size << ','
+    dsr[...-dsr.padding].to_s(io, replacing: {'C' => 'T'})    # output C=>T before CG
+    dsr[-dsr.padding..-dsr.padding + 1].to_s(io)              # output CG intact
+    dsr[-dsr.padding + 2..].to_s(io, replacing: {'C' => 'T'}) # output C=>T after CG
+    io << ','
+    io << usr.start + 1 << ',' << usr.size << ','
+    usr[-usr.padding - 1..].to_s(io, complement: true, replacing: {'C' => 'T'}) # output C=>T before CG
+    usr[-usr.padding - 3..-usr.padding - 2].to_s(io, complement: true)          # output complement CG intact
+    usr[..-usr.padding - 4].to_s(io, complement: true, replacing: {'C' => 'T'}) # output C=>T after CG
+    io << ','
+    io << amplicon.size - 1 << ',' << amplicon.cpg_count
+    io.puts
+  end
+end
+
 primer_size = 15..25
 amplicon_size = 100..150
 allowed_cpg = 3..40
@@ -63,27 +86,8 @@ File.open(path) do |fasta|
     amplicons = Softepigen.generate_amplicons(
       downstream_primers, upstream_primers, amplicon_size, allowed_cpg)
 
-    File.open("#{name}-out.csv", "w") do |csv|
-      {"FORWARD POSITION", "LENGTH IN BP", "FORWARD PRIMER",
-       "REVERSE POSITION", "LENGTH IN BP", "REVERSE PRIMER",
-       "AMPLICON SIZE", "NUMBERCpG"}.join csv, ','
-      csv.puts
-
-      amplicons.each do |amplicon|
-        dsr, usr = amplicon.primers
-        csv << dsr.start + 1 << ',' << dsr.size << ','
-        dsr[...-dsr.padding].to_s(csv, replacing: {'C' => 'T'})    # output C=>T before CG
-        dsr[-dsr.padding..-dsr.padding + 1].to_s(csv)              # output CG intact
-        dsr[-dsr.padding + 2..].to_s(csv, replacing: {'C' => 'T'}) # output C=>T after CG
-        csv << ','
-        csv << usr.start + 1 << ',' << usr.size << ','
-        usr[-usr.padding - 1..].to_s(csv, complement: true, replacing: {'C' => 'T'}) # output C=>T before CG
-        usr[-usr.padding - 3..-usr.padding - 2].to_s(csv, complement: true)          # output complement CG intact
-        usr[..-usr.padding - 4].to_s(csv, complement: true, replacing: {'C' => 'T'}) # output C=>T after CG
-        csv << ','
-        csv << amplicon.size - 1 << ',' << amplicon.cpg_count
-        csv.puts
-      end
+    File.open("#{name}-out.csv", "w") do |io|
+      write_csv io, amplicons
     end
   end
 end
