@@ -8,6 +8,6 @@ describe Softepigen do
     output = File.read "chr1777777-out.csv"
     output.should eq expected
   ensure
-    File.delete "chr1777777-out.csv"
+    File.delete "chr1777777-out.csv" if File.exists?("chr1777777-out.csv")
   end
 end
