@@ -53,4 +53,31 @@ module Softepigen
     end
     {downstream_primers, upstream_primers}
   end
+
+  def self.generate_amplicons(
+    downstream_primers : Array(Region),
+    upstream_primers : Array(Region),
+    amplicon_size : Range(Int, Int),
+    allowed_cpg : Range(Int, Int)
+  ) : Array(Amplicon)
+    amplicons = [] of Amplicon
+    offset = 0
+    downstream_primers.each do |dsr|
+      upstream_primers.each(within: offset..) do |usr|
+        distance = usr.stop - dsr.start
+        if distance < amplicon_size.begin
+          # skip if upstream primer is before downstream primer
+          offset += 1
+          next
+        elsif distance > amplicon_size.end
+          # next upstream primers will produce an amplicon too large so stop
+          break
+        end
+
+        amplicon = Amplicon.new(dsr, usr)
+        amplicons << amplicon if amplicon.cpg_count.in?(allowed_cpg)
+      end
+    end
+    amplicons
+  end
 end
