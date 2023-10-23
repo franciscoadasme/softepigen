@@ -2,12 +2,19 @@ require "./spec_helper"
 
 describe Softepigen do
   it "reports primers" do
-    expected = File.read "#{__DIR__}/data/chr1777777-out.csv"
-    `shards run --without-development softepigen -- #{__DIR__}/data/chr1777777.fasta`
+    basename = "chr1777777"
+
+    `shards run --without-development softepigen -- #{__DIR__}/data/#{basename}.fasta`
     $?.success?.should be_true
-    output = File.read "chr1777777-out.csv"
-    output.should eq expected
+
+    expected = File.read "#{__DIR__}/data/#{basename}-out.csv"
+    File.read("#{basename}-out.csv").should eq expected
+
+    expected = File.read "#{__DIR__}/data/#{basename}-out.bedgraph"
+    File.read("#{basename}-out.bedgraph").should eq expected
   ensure
-    File.delete "chr1777777-out.csv" if File.exists?("chr1777777-out.csv")
+    Dir.glob("#{basename}-out.*") do |path|
+      File.delete path
+    end
   end
 end
