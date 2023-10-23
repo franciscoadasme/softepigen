@@ -35,6 +35,12 @@ struct Softepigen::Region
     end
   end
 
+  def cpg_count : Int32
+    count = 0
+    each_cpg { count += 1 }
+    count
+  end
+
   def each_cpg(& : Int32 ->) : Nil
     offset = 0
     while (index = @buffer.index(BYTE_C, offset))
