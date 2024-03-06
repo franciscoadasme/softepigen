@@ -31,7 +31,7 @@ module Softepigen
       region.each_downstream(complex_idxs) do |subregion|
         next unless subregion.size.in?(primer_size)
         next if subregion.has_repeats?(REPEAT_SIZE)
-        if subregion.stop - 4 >= 0
+        if subregion.start - 4 >= 0
           4.downto(1) do |i|
             other = subregion.unsafe_upstream_expand(i)
             forward_primers << other unless other.has_repeats?(REPEAT_SIZE)
