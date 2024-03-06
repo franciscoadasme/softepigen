@@ -65,7 +65,10 @@ struct Softepigen::Region
     complex_idxs.each do |i|
       next unless i >= 11 + 2
       next unless @buffer[i - 11] == 'C'.ord # starts with bisulfite conversion (*CG)
+      # WARN: It's overextending by two characters at the end, which may
+      # be out of bounds. Remove trailing zeros
       slice = Bytes.new(@buffer.to_unsafe + i - 11, size - i + 11 + 2)
+      slice = slice[..slice.rindex!(&.positive?)] if slice.last == 0
       yield Region.new(slice, @start + i - 11)
     end
   end
