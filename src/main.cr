@@ -101,9 +101,9 @@ File.open(path) do |fasta|
     puts "Processing #{name}..."
 
     seq = Softepigen::Region.new fasta.read_line
-    forward_primers, reverse_primers = Softepigen.find_primers(seq, primer_size, kmer)
+    forward_regions, reverse_regions = Softepigen.find_primers(seq, primer_size, kmer)
     amplicons = Softepigen.generate_amplicons(
-      forward_primers, reverse_primers, amplicon_size, allowed_cpg)
+      forward_regions, reverse_regions, amplicon_size, allowed_cpg)
 
     File.open("#{name}-out.csv", "w") do |io|
       write_csv io, amplicons
