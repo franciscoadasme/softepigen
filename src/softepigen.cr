@@ -27,6 +27,10 @@ module Softepigen
       @range.begin <=> other.range.begin
     end
 
+    def size : Int32
+      stop - start + 1
+    end
+
     def start : Int32
       @range.begin
     end
