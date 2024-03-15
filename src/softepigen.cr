@@ -80,4 +80,33 @@ module Softepigen
     end
     amplicons
   end
+
+  def self.write_csv(io : IO, amplicons : Array(Amplicon)) : Nil
+    {"FORWARD POSITION", "LENGTH IN BP", "FORWARD PRIMER",
+     "REVERSE POSITION", "LENGTH IN BP", "REVERSE PRIMER",
+     "AMPLICON SIZE", "NUMBERCpG"}.join io, ','
+    io.puts
+
+    amplicons.each do |amplicon|
+      dsr, usr = amplicon.primers
+      io << dsr.start + 1 << ',' << dsr.size << ','
+      dsr[...-dsr.padding].to_s(io, replacing: {'C' => 'T'})    # output C=>T before CG
+      dsr[-dsr.padding..-dsr.padding + 1].to_s(io)              # output CG intact
+      dsr[-dsr.padding + 2..].to_s(io, replacing: {'C' => 'T'}) # output C=>T after CG
+      io << ','
+      io << usr.start + 1 << ',' << usr.size << ','
+      usr[-usr.padding - 1..].to_s(io, complement: true, replacing: {'C' => 'T'}) # output C=>T before CG
+      usr[-usr.padding - 3..-usr.padding - 2].to_s(io, complement: true)          # output complement CG intact
+      usr[..-usr.padding - 4].to_s(io, complement: true, replacing: {'C' => 'T'}) # output C=>T after CG
+      io << ','
+      io << amplicon.size - 1 << ',' << amplicon.cpg_count
+      io.puts
+    end
+  end
+
+  def self.write_csv(path : Path | String, amplicons : Array(Amplicon)) : Nil
+    File.open(path, "w") do |io|
+      write_csv io, amplicons
+    end
+  end
 end
