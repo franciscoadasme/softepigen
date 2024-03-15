@@ -9,9 +9,6 @@ describe Softepigen do
 
     expected = File.read "#{__DIR__}/data/#{basename}-out.csv"
     File.read("#{basename}-out.csv").should eq expected
-
-    expected = File.read "#{__DIR__}/data/#{basename}-out.bedgraph"
-    File.read("#{basename}-out.bedgraph").should eq expected
   ensure
     Dir.glob("#{basename}-out.*") do |path|
       File.delete path

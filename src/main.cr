@@ -4,25 +4,6 @@ require "./softepigen"
 
 REPEAT_SIZE = 5
 
-def write_bedgraph(
-  io : IO,
-  name : String,
-  amplicons : Array(Softepigen::Amplicon),
-  header : Bool = true
-) : Nil
-  io.puts %(track type=bedGraph name="Amplicons" description="Amplicons detected by the MS-HRM method")
-  amplicons.each do |amplicon|
-    io << name
-    io << '\t'
-    io << amplicon.forward_primer.start
-    io << '\t'
-    io << amplicon.reverse_primer.stop
-    io << '\t'
-    io << amplicon.size
-    io.puts
-  end
-end
-
 def write_csv(io : IO, amplicons : Array(Softepigen::Amplicon)) : Nil
   {"FORWARD POSITION", "LENGTH IN BP", "FORWARD PRIMER",
    "REVERSE POSITION", "LENGTH IN BP", "REVERSE PRIMER",
@@ -107,9 +88,6 @@ File.open(path) do |fasta|
 
     File.open("#{name}-out.csv", "w") do |io|
       write_csv io, amplicons
-    end
-    File.open("#{name}-out.bedgraph", "w") do |io|
-      write_bedgraph io, name, amplicons
     end
   end
 end
