@@ -102,6 +102,45 @@ module Softepigen
     amplicons
   end
 
+  def self.write_bed(
+    io : IO,
+    chromosome : String,
+    primers : Array(Primer)
+  ) : Nil
+    counter = {Sense::Forward => 0, Sense::Backward => 0}
+    start = primers.min_of &.range.begin
+    stop = primers.min_of &.range.end
+
+    io.puts "browser position #{chromosome}:#{start}-#{stop}"
+    io.puts "browser hide all"
+    io.puts %(track type=bed name="Primers" description="Primers detected by the MS-HRM method" itemRgb="On")
+    CSV.build(io, '\t', quoting: :none) do |csv|
+      primers.sort!.each do |primer|
+        prefix = primer.sense.forward? ? "Pos" : "Neg"
+        name = prefix + (counter[primer.sense] += 1).to_s
+        sense_symbol = primer.sense.forward? ? '+' : '-'
+        rgb = primer.sense.forward? ? "0,0,255" : "255,0,0"
+        csv.row do |row|
+          row << chromosome
+          row << primer.start
+          row << primer.stop
+          row << name
+          row << 0
+          row << sense_symbol
+          row << primer.start
+          row << primer.stop
+          row << rgb
+        end
+      end
+    end
+  end
+
+  def self.write_bed(path : Path | String, chromosome : String, primers : Array(Primer)) : Nil
+    File.open(path, "w") do |io|
+      write_bed io, chromosome, primers
+    end
+  end
+
   def self.write_csv(io : IO, amplicons : Array(Amplicon)) : Nil
     {"FORWARD POSITION", "LENGTH IN BP", "FORWARD PRIMER",
      "REVERSE POSITION", "LENGTH IN BP", "REVERSE PRIMER",
