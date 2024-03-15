@@ -27,6 +27,10 @@ module Softepigen
       @range.begin <=> other.range.begin
     end
 
+    def includes?(other : self) : Bool
+      other.sense == sense && other.start >= start && other.stop <= stop
+    end
+
     def size : Int32
       stop - start + 1
     end
