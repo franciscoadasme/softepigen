@@ -15,6 +15,27 @@ module Softepigen
     ).map(&.to_slice),
   }
 
+  enum Sense
+    Forward
+    Backward
+  end
+
+  record Primer, range : Range(Int32, Int32), sense : Sense do
+    include Comparable(Primer)
+
+    def <=>(other : self) : Int32
+      @range.begin <=> other.range.begin
+    end
+
+    def start : Int32
+      @range.begin
+    end
+
+    def stop : Int32
+      @range.end
+    end
+  end
+
   def self.find_primers(
     seq : Region,
     primer_size : Range(Int, Int),
