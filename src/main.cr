@@ -52,6 +52,8 @@ end
 path = ARGV[0]? || abort "error: Missing input FASTA file\n#{parser}"
 abort "error: FASTA file not found" unless File.exists?(path)
 File.open(path) do |fasta|
+  chr = ""
+  primers = [] of Softepigen::Primer
   fasta.each_line do |line|
     next unless line.starts_with?('>')
 
@@ -63,6 +65,27 @@ File.open(path) do |fasta|
     amplicons = Softepigen.generate_amplicons(
       forward_regions, reverse_regions, amplicon_size, allowed_cpg)
 
+    tokens = name.split(/[\-:]/)
+    chr = tokens[0]
+    seq_start = tokens[1]?.try(&.to_f.to_i)
+    # TODO: filter primers that produce valid amplicons only?
+    {
+      {forward_regions, Softepigen::Sense::Forward},
+      {reverse_regions, Softepigen::Sense::Backward},
+    }.each do |regions, sense|
+      regions.each do |region|
+        start = (seq_start || 0) + region.start
+        primers << Softepigen::Primer.new(start..(start + region.size), sense)
+      end
+    end
+
     Softepigen.write_csv "#{name}-out.csv", amplicons
   end
+
+  # Report non-overlap primers only
+  primers = primers.uniq!
+    .chunk_while(reuse: true) { |pi, pj| pi.in?(pj) || pj.in?(pi) }
+    .map(&.max_by &.size)
+    .to_a
+  Softepigen.write_bed "#{chr}-out.bed", chr, primers
 end
