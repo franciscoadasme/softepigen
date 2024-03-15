@@ -109,7 +109,7 @@ module Softepigen
   ) : Nil
     counter = {Sense::Forward => 0, Sense::Backward => 0}
     start = primers.min_of &.range.begin
-    stop = primers.min_of &.range.end
+    stop = primers.max_of &.range.end
 
     io.puts "browser position #{chromosome}:#{start}-#{stop}"
     io.puts "browser hide all"
