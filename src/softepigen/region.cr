@@ -10,8 +10,8 @@ struct Softepigen::Region
     raise ArgumentError.new("Negative start") if @start.negative?
   end
 
-  def self.new(str : String) : self
-    new str.to_slice, 0
+  def self.new(str : String, offset : Int32) : self
+    new str.to_slice, offset
   end
 
   def [](range : Range(Int?, Int?)) : self
