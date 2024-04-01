@@ -14,7 +14,23 @@ struct Softepigen::Amplicon
     @region = Region.new buffer, @forward_primer.start
   end
 
+  def includes?(other : self) : Bool
+    other.start >= start && other.stop <= stop
+  end
+
   def primers : Tuple(Region, Region)
     {@forward_primer, @reverse_primer}
+  end
+
+  def size : Int32
+    stop - start + 1
+  end
+
+  def start : Int32
+    @forward_primer.stop + 1
+  end
+
+  def stop : Int32
+    @reverse_primer.start - 1
   end
 end

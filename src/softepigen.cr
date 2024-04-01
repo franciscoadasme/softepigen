@@ -83,6 +83,16 @@ module Softepigen
     {forward_primers, reverse_primers}
   end
 
+  # Returns the non-overlapping amplicons only.
+  def self.fold_amplicons(amplicons : Array(Amplicon)) : Array(Amplicon)
+    amplicons
+      .chunk_while(reuse: true) { |ai, aj| ai.in?(aj) || aj.in?(ai) }
+      .map do |arr|
+        arr.max_by { |a| {a.size, a.forward_primer.size, a.reverse_primer.size} }
+      end
+      .to_a
+  end
+
   def self.generate_amplicons(
     forward_primers : Array(Region),
     reverse_primers : Array(Region),
