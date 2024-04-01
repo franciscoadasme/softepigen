@@ -8,6 +8,7 @@ primer_size = 15..25
 amplicon_size = 100..150
 allowed_cpg = 3..40
 kmer = 4
+should_report_amplicons = false
 parser = OptionParser.parse do |parser|
   parser.banner = "Usage: softepigen [-a=N,M] [-p=N,M] [-c=N,M] FASTA"
   parser.on(
@@ -39,6 +40,11 @@ parser = OptionParser.parse do |parser|
            when "1" then 5
            else          abort "error: Invalid astringency #{str.inspect}"
            end
+  end
+  parser.on(
+    "--report-amplicons",
+    "Report all amplicons in a CSV file per each sequence") do
+    should_report_amplicons = true
   end
   parser.on("-h", "--help", "Show this help") do
     puts parser
@@ -78,7 +84,7 @@ File.open(path) do |fasta|
       end
     end
 
-    Softepigen.write_csv "#{name}-out.csv", amplicons
+    Softepigen.write_csv "#{name}-out.csv", amplicons if should_report_amplicons
   end
 
   Softepigen.write_bed "#{chr}-out.bed", chr, primers
