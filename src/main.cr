@@ -70,7 +70,7 @@ File.open(path) do |fasta|
     chr = tokens[0]
     seq_offset = tokens[1]?.try(&.to_f.to_i) || 1
 
-    seq = Softepigen::Region.new fasta.read_line
+    seq = Softepigen::Region.new fasta.read_line, seq_offset
     forward_regions, reverse_regions = Softepigen.find_primers(seq, primer_size, kmer)
     amplicons = Softepigen.generate_amplicons(
       forward_regions, reverse_regions, amplicon_size, allowed_cpg)
@@ -81,6 +81,7 @@ File.open(path) do |fasta|
         {amplicon.reverse_primer, Softepigen::Sense::Backward},
       }.each do |region, sense|
         start = seq_offset + region.start
+        start = region.start
         primers << Softepigen::Primer.new(start..(start + region.size), sense)
       end
     end
