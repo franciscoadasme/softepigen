@@ -66,14 +66,15 @@ File.open(path) do |fasta|
     name = line[1..]
     puts "Processing #{name}..."
 
+    tokens = name.split(/[\-:]/)
+    chr = tokens[0]
+    seq_offset = tokens[1]?.try(&.to_f.to_i) || 1
+
     seq = Softepigen::Region.new fasta.read_line
     forward_regions, reverse_regions = Softepigen.find_primers(seq, primer_size, kmer)
     amplicons = Softepigen.generate_amplicons(
       forward_regions, reverse_regions, amplicon_size, allowed_cpg)
 
-    tokens = name.split(/[\-:]/)
-    chr = tokens[0]
-    seq_offset = tokens[1]?.try(&.to_f.to_i) || 0
     Softepigen.fold_amplicons(amplicons).each do |amplicon|
       {
         {amplicon.forward_primer, Softepigen::Sense::Forward},
