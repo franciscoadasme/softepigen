@@ -68,14 +68,13 @@ File.open(path) do |fasta|
 
     tokens = name.split(/[\-:]/)
     chr = tokens[0]
-    seq_start = tokens[1]?.try(&.to_f.to_i)
-    # TODO: filter primers that produce valid amplicons only?
-    {
-      {forward_regions, Softepigen::Sense::Forward},
-      {reverse_regions, Softepigen::Sense::Backward},
-    }.each do |regions, sense|
-      regions.each do |region|
-        start = (seq_start || 0) + region.start
+    seq_offset = tokens[1]?.try(&.to_f.to_i) || 0
+    amplicons.each do |amplicon|
+      {
+        {amplicon.forward_primer, Softepigen::Sense::Forward},
+        {amplicon.reverse_primer, Softepigen::Sense::Backward},
+      }.each do |region, sense|
+        start = seq_offset + region.start
         primers << Softepigen::Primer.new(start..(start + region.size), sense)
       end
     end
@@ -83,10 +82,5 @@ File.open(path) do |fasta|
     Softepigen.write_csv "#{name}-out.csv", amplicons
   end
 
-  # Report non-overlap primers only
-  primers = primers.uniq!
-    .chunk_while(reuse: true) { |pi, pj| pi.in?(pj) || pj.in?(pi) }
-    .map(&.max_by &.size)
-    .to_a
   Softepigen.write_bed "#{chr}-out.bed", chr, primers
 end
