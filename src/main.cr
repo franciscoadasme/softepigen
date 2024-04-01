@@ -64,12 +64,11 @@ File.open(path) do |fasta|
     forward_regions, reverse_regions = Softepigen.find_primers(seq, primer_size, kmer)
     amplicons = Softepigen.generate_amplicons(
       forward_regions, reverse_regions, amplicon_size, allowed_cpg)
-    amplicons = Softepigen.fold_amplicons(amplicons)
 
     tokens = name.split(/[\-:]/)
     chr = tokens[0]
     seq_offset = tokens[1]?.try(&.to_f.to_i) || 0
-    amplicons.each do |amplicon|
+    Softepigen.fold_amplicons(amplicons).each do |amplicon|
       {
         {amplicon.forward_primer, Softepigen::Sense::Forward},
         {amplicon.reverse_primer, Softepigen::Sense::Backward},
