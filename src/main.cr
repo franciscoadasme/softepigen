@@ -64,6 +64,7 @@ File.open(path) do |fasta|
     forward_regions, reverse_regions = Softepigen.find_primers(seq, primer_size, kmer)
     amplicons = Softepigen.generate_amplicons(
       forward_regions, reverse_regions, amplicon_size, allowed_cpg)
+    amplicons = Softepigen.fold_amplicons(amplicons)
 
     tokens = name.split(/[\-:]/)
     chr = tokens[0]
