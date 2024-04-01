@@ -123,39 +123,44 @@ module Softepigen
   def self.write_bed(
     io : IO,
     chromosome : String,
-    primers : Array(Primer)
+    amplicons : Array(Amplicon)
   ) : Nil
     counter = {Sense::Forward => 0, Sense::Backward => 0}
-    start = primers.min_of &.range.begin
-    stop = primers.max_of &.range.end
+    start = amplicons[0].forward_primer.start
+    stop = amplicons[-1].reverse_primer.stop
 
     io.puts "browser position #{chromosome}:#{start}-#{stop}"
     io.puts "browser hide all"
     io.puts %(track type=bed name="Primers" description="Primers detected by the MS-HRM method" itemRgb="On")
     CSV.build(io, '\t', quoting: :none) do |csv|
-      primers.sort!.each do |primer|
-        prefix = primer.sense.forward? ? "Pos" : "Neg"
-        name = prefix + (counter[primer.sense] += 1).to_s
-        sense_symbol = primer.sense.forward? ? '+' : '-'
-        rgb = primer.sense.forward? ? "0,0,255" : "255,0,0"
-        csv.row do |row|
-          row << chromosome
-          row << primer.start
-          row << primer.stop
-          row << name
-          row << 0
-          row << sense_symbol
-          row << primer.start
-          row << primer.stop
-          row << rgb
+      amplicons.each do |amplicon|
+        {
+          {amplicon.forward_primer, Softepigen::Sense::Forward},
+          {amplicon.reverse_primer, Softepigen::Sense::Backward},
+        }.each do |primer, sense|
+          prefix = sense.forward? ? "Pos" : "Neg"
+          name = prefix + (counter[sense] += 1).to_s
+          sense_symbol = sense.forward? ? '+' : '-'
+          rgb = sense.forward? ? "0,0,255" : "255,0,0"
+          csv.row do |row|
+            row << chromosome
+            row << primer.start
+            row << primer.stop
+            row << name
+            row << 0
+            row << sense_symbol
+            row << primer.start
+            row << primer.stop
+            row << rgb
+          end
         end
       end
     end
   end
 
-  def self.write_bed(path : Path | String, chromosome : String, primers : Array(Primer)) : Nil
+  def self.write_bed(path : Path | String, chromosome : String, amplicons : Array(Amplicon)) : Nil
     File.open(path, "w") do |io|
-      write_bed io, chromosome, primers
+      write_bed io, chromosome, amplicons
     end
   end
 

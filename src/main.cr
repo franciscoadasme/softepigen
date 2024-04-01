@@ -59,7 +59,7 @@ path = ARGV[0]? || abort "error: Missing input FASTA file\n#{parser}"
 abort "error: FASTA file not found" unless File.exists?(path)
 File.open(path) do |fasta|
   chr = ""
-  primers = [] of Softepigen::Primer
+  all_amplicons = [] of Softepigen::Amplicon
   fasta.each_line do |line|
     next unless line.starts_with?('>')
 
@@ -75,19 +75,8 @@ File.open(path) do |fasta|
     amplicons = Softepigen.generate_amplicons(
       forward_regions, reverse_regions, amplicon_size, allowed_cpg)
 
-    Softepigen.fold_amplicons(amplicons).each do |amplicon|
-      {
-        {amplicon.forward_primer, Softepigen::Sense::Forward},
-        {amplicon.reverse_primer, Softepigen::Sense::Backward},
-      }.each do |region, sense|
-        start = seq_offset + region.start
-        start = region.start
-        primers << Softepigen::Primer.new(start..(start + region.size), sense)
-      end
-    end
-
-    Softepigen.write_csv "#{name}-out.csv", amplicons if should_report_amplicons
+    all_amplicons.concat amplicons
   end
 
-  Softepigen.write_bed "#{chr}-out.bed", chr, primers
+  Softepigen.write_bed "#{chr}-out.bed", chr, Softepigen.fold_amplicons(all_amplicons)
 end
