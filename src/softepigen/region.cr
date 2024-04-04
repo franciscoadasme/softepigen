@@ -2,6 +2,7 @@ struct Softepigen::Region
   getter padding : Int32
   getter start : Int32
   getter stop : Int32 { @start + size - 1 }
+  getter range : Range(Int32, Int32) { start..stop }
 
   BYTE_C = 'C'.ord.to_u8
   BYTE_G = 'G'.ord.to_u8
