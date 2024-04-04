@@ -143,8 +143,13 @@ module Softepigen
   def self.write_csv(io : IO, amplicons : Array(Amplicon)) : Nil
     {"FORWARD POSITION", "LENGTH IN BP", "FORWARD PRIMER",
      "REVERSE POSITION", "LENGTH IN BP", "REVERSE PRIMER",
-     "AMPLICON SIZE", "NUMBERCpG"}.join io, ','
+     "AMPLICON SIZE", "NUMBERCpG", "Label"}.join io, ','
     io.puts
+
+    folded_amplicons = fold_amplicons(amplicons)
+      .map { |amp| {amp.forward_primer.range, amp.reverse_primer.range} }
+      .to_set
+    amplicon_index = 1
 
     amplicons.each do |amplicon|
       dsr, usr = amplicon.primers
@@ -159,6 +164,10 @@ module Softepigen
       usr[..-usr.padding - 4].to_s(io, complement: true, replacing: {'C' => 'T'}) # output C=>T after CG
       io << ','
       io << amplicon.size - 1 << ',' << amplicon.cpg_count
+      if {amplicon.forward_primer.range, amplicon.reverse_primer.range}.in?(folded_amplicons)
+        io << ',' << "Pos" << amplicon_index << "-Neg" << amplicon_index
+        amplicon_index += 1
+      end
       io.puts
     end
   end
