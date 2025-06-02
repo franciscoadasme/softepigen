@@ -2,8 +2,6 @@ require "csv"
 require "option_parser"
 require "./softepigen"
 
-REPEAT_SIZE = 5
-
 primer_size = 15..25
 amplicon_size = 100..150
 allowed_cpg = 3..40

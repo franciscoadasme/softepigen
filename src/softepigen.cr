@@ -14,6 +14,7 @@ module Softepigen
       ATAGA
     ).map(&.to_slice),
   }
+  MAX_REPEAT_SIZE = 5
 
   enum Sense
     Forward
@@ -23,7 +24,7 @@ module Softepigen
   def self.find_primers(
     seq : Region,
     primer_size : Range(Int, Int),
-    kmer : Int
+    kmer : Int,
   ) : Tuple(Array(Region), Array(Region))
     regions = seq.split_by_cpg
     regions.select! &.size.>=(primer_size.begin)
@@ -35,11 +36,11 @@ module Softepigen
 
       region.each_downstream(complex_idxs) do |subregion|
         next unless subregion.size.in?(primer_size)
-        next if subregion.has_repeats?(REPEAT_SIZE)
+        next if subregion.has_repeats?(MAX_REPEAT_SIZE)
         if subregion.start - 4 >= 0
           4.downto(1) do |i|
             other = subregion.unsafe_upstream_expand(i)
-            forward_primers << other unless other.has_repeats?(REPEAT_SIZE)
+            forward_primers << other unless other.has_repeats?(MAX_REPEAT_SIZE)
           end
         end
         forward_primers << subregion
@@ -47,11 +48,11 @@ module Softepigen
 
       region.each_upstream(complex_idxs) do |subregion|
         next unless subregion.size.in?(primer_size)
-        reverse_primers << subregion unless subregion.has_repeats?(REPEAT_SIZE)
+        reverse_primers << subregion unless subregion.has_repeats?(MAX_REPEAT_SIZE)
         if subregion.stop + 4 < seq.size
           1.upto(4) do |i|
             other = subregion.unsafe_downstream_expand(i)
-            reverse_primers << other unless other.has_repeats?(REPEAT_SIZE)
+            reverse_primers << other unless other.has_repeats?(MAX_REPEAT_SIZE)
           end
         end
       end
@@ -73,7 +74,7 @@ module Softepigen
     forward_primers : Array(Region),
     reverse_primers : Array(Region),
     amplicon_size : Range(Int, Int),
-    allowed_cpg : Range(Int, Int)
+    allowed_cpg : Range(Int, Int),
   ) : Array(Amplicon)
     amplicons = [] of Amplicon
     offset = 0
@@ -99,7 +100,7 @@ module Softepigen
   def self.write_bed(
     io : IO,
     chromosome : String,
-    amplicons : Array(Amplicon)
+    amplicons : Array(Amplicon),
   ) : Nil
     counter = {Sense::Forward => 0, Sense::Backward => 0}
     start = amplicons[0].forward_primer.start
