@@ -1,3 +1,4 @@
+require "csv"
 require "./softepigen/**"
 
 # TODO: Write documentation for `Softepigen`

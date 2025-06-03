@@ -1,4 +1,3 @@
-require "csv"
 require "option_parser"
 require "./softepigen"
 
