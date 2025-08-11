@@ -817,5 +817,5 @@ describe Softepigen::Region do
 end
 
 private def seq(str)
-  Softepigen::Region.new(str)
+  Softepigen::Region.new(str, 0)
 end

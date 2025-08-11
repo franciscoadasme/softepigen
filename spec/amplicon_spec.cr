@@ -3,7 +3,7 @@ require "./spec_helper"
 describe Softepigen::Region do
   describe "#new" do
     it "creates the amplicon from primers" do
-      seq = Softepigen::Region.new "CGCCTGCAGGGCTGGAAGA"
+      seq = Softepigen::Region.new "CGCCTGCAGGGCTGGAAGA", 0
       amplicon = Softepigen::Amplicon.new seq[3..4], seq[15..17]
       amplicon.to_s.should eq seq[3..17].to_s
       amplicon.forward_primer.to_s.should eq seq[3..4].to_s
