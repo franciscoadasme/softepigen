@@ -22,6 +22,41 @@ module Softepigen
     Backward
   end
 
+  def self.find_amplicons(
+    io : IO,
+    primer_size : Range(Int, Int) = 15..25,
+    amplicon_size : Range(Int, Int) = 100..150,
+    allowed_cpg : Range(Int, Int) = 3..40,
+    kmer : Int = 4,
+  ) : Array(Amplicon)
+    amplicons = [] of Softepigen::Amplicon
+    io.each_line do |line|
+      next unless line.starts_with?('>')
+
+      name = line[1..]
+      tokens = name.split(/[\-:]/)
+      seq_offset = tokens[1]?.try(&.to_f.to_i) || 1
+
+      seq = Softepigen::Region.new io.read_line, seq_offset
+      forward_regions, reverse_regions = Softepigen.find_primers(seq, primer_size, kmer)
+      amplicons.concat Softepigen.generate_amplicons(
+        forward_regions, reverse_regions, amplicon_size, allowed_cpg)
+    end
+    amplicons
+  end
+
+  def self.find_amplicons(
+    path : Path | String,
+    primer_size : Range(Int, Int) = 15..25,
+    amplicon_size : Range(Int, Int) = 100..150,
+    allowed_cpg : Range(Int, Int) = 3..40,
+    kmer : Int = 4,
+  ) : Array(Amplicon)
+    File.open(path) do |io|
+      find_amplicons io, primer_size, amplicon_size, allowed_cpg, kmer
+    end
+  end
+
   def self.find_primers(
     seq : Region,
     primer_size : Range(Int, Int),

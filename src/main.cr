@@ -46,27 +46,12 @@ parser = OptionParser.parse do |parser|
   end
 end
 
-path = ARGV[0]? || abort "error: Missing input FASTA file\n#{parser}"
+path = ARGV[0]?.try { |x| Path[x] } || abort "error: Missing input FASTA file\n#{parser}"
 abort "error: FASTA file not found" unless File.exists?(path)
-File.open(path) do |fasta|
-  chr = ""
-  amplicons = [] of Softepigen::Amplicon
-  fasta.each_line do |line|
-    next unless line.starts_with?('>')
 
-    name = line[1..]
-    puts "Processing #{name}..."
-
-    tokens = name.split(/[\-:]/)
-    chr = tokens[0]
-    seq_offset = tokens[1]?.try(&.to_f.to_i) || 1
-
-    seq = Softepigen::Region.new fasta.read_line, seq_offset
-    forward_regions, reverse_regions = Softepigen.find_primers(seq, primer_size, kmer)
-    amplicons.concat Softepigen.generate_amplicons(
-      forward_regions, reverse_regions, amplicon_size, allowed_cpg)
-  end
-
-  Softepigen.write_csv "#{chr}-out.csv", amplicons
-  Softepigen.write_bed "#{chr}-out.bed", chr, Softepigen.fold_amplicons(amplicons)
+amplicons = Softepigen.find_amplicons(path, primer_size, amplicon_size, allowed_cpg, kmer)
+chr = File.open(path) do |file|
+  file.read_line.lchop('>').split(/[\-:]/)[0]
 end
+Softepigen.write_csv "#{chr}-out.csv", amplicons
+Softepigen.write_bed "#{chr}-out.bed", chr, Softepigen.fold_amplicons(amplicons)
