@@ -139,8 +139,8 @@ module Softepigen
     amplicons : Array(Amplicon),
   ) : Nil
     counter = {Sense::Forward => 0, Sense::Backward => 0}
-    start = amplicons[0].forward_primer.start
-    stop = amplicons[-1].reverse_primer.stop
+    start = amplicons[0]?.try(&.forward_primer.start) || 0
+    stop = amplicons[-1]?.try(&.reverse_primer.stop) || 0
 
     io.puts "browser position #{chromosome}:#{start}-#{stop}"
     io.puts "browser hide all"
