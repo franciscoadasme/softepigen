@@ -5,8 +5,9 @@ primer_size = 15..25
 amplicon_size = 100..150
 allowed_cpg = 3..40
 kmer = 4
+output = nil
 parser = OptionParser.parse do |parser|
-  parser.banner = "Usage: softepigen [-a=N,M] [-p=N,M] [-c=N,M] FASTA"
+  parser.banner = "Usage: softepigen [-a=N,M] [-p=N,M] [-c=N,M] [-o/--output NAME] FASTA"
   parser.on(
     "-a=N,M", "--amplicon=N,M",
     "Amplicon size from N to M. Defaults to #{amplicon_size}") do |str|
@@ -37,6 +38,12 @@ parser = OptionParser.parse do |parser|
            else          abort "error: Invalid astringency #{str.inspect}"
            end
   end
+  parser.on(
+    "-o NAME",
+    "--output NAME",
+    "Output name (without extension) for the output files.") do |str|
+    output = str
+  end
   parser.on("-h", "--help", "Show this help") do
     puts parser
     exit
@@ -56,6 +63,6 @@ FASTA.each(path) do |header, seq|
   chr = header.name if header
   break
 end
-stem = File.basename(path.stem, ".fasta") # sometimes ends in .fasta.txt
-Softepigen.write_csv "#{stem}-out.csv", amplicons
-Softepigen.write_bed "#{stem}-out.bed", chr, Softepigen.fold_amplicons(amplicons)
+output ||= File.basename(path.stem, ".fasta") # sometimes ends in .fasta.txt
+Softepigen.write_csv "#{output}-out.csv", amplicons
+Softepigen.write_bed "#{output}-out.bed", chr, Softepigen.fold_amplicons(amplicons)
