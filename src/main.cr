@@ -50,8 +50,11 @@ path = ARGV[0]?.try { |x| Path[x] } || abort "error: Missing input FASTA file\n#
 abort "error: FASTA file not found" unless File.exists?(path)
 
 amplicons = Softepigen.find_amplicons(path, primer_size, amplicon_size, allowed_cpg, kmer)
-chr = File.open(path) do |file|
-  file.read_line.lchop('>').split(/[\-:]/)[0]
+
+chr = "chr??"
+FASTA.each(path) do |header, seq|
+  chr = header.name if header
+  break
 end
 Softepigen.write_csv "#{chr}-out.csv", amplicons
 Softepigen.write_bed "#{chr}-out.bed", chr, Softepigen.fold_amplicons(amplicons)
