@@ -56,5 +56,6 @@ FASTA.each(path) do |header, seq|
   chr = header.name if header
   break
 end
-Softepigen.write_csv "#{chr}-out.csv", amplicons
-Softepigen.write_bed "#{chr}-out.bed", chr, Softepigen.fold_amplicons(amplicons)
+stem = File.basename(path.stem, ".fasta") # sometimes ends in .fasta.txt
+Softepigen.write_csv "#{stem}-out.csv", amplicons
+Softepigen.write_bed "#{stem}-out.bed", chr, Softepigen.fold_amplicons(amplicons)
