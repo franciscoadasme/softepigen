@@ -1,6 +1,6 @@
 module FASTA
   FLOAT_REGEX  = /\d+((\.\d+)?[eE]\+?\d+)?/
-  HEADER_REGEX = /(?<name>chr\d+)([:\-](?<start>#{FLOAT_REGEX})-(?<end>#{FLOAT_REGEX}))?/
+  HEADER_REGEX = /(?<name>chr\d+)([:\-](?<start>#{FLOAT_REGEX})-(?<end>#{FLOAT_REGEX}))?/i
 
   record Header, name : String, range : Range(Int32, Int32) | Nil
 

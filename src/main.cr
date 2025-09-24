@@ -60,7 +60,7 @@ amplicons = Softepigen.find_amplicons(path, primer_size, amplicon_size, allowed_
 
 chr = "chr??"
 FASTA.each(path) do |header, seq|
-  chr = header.name if header
+  chr = header.name.downcase if header
   break
 end
 output ||= File.basename(path.stem, ".fasta") # sometimes ends in .fasta.txt
