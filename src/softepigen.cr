@@ -31,14 +31,8 @@ module Softepigen
     kmer : Int = 4,
   ) : Array(Amplicon)
     amplicons = [] of Softepigen::Amplicon
-    io.each_line do |line|
-      next unless line.starts_with?('>')
-
-      name = line[1..]
-      tokens = name.split(/[\-:]/)
-      seq_offset = tokens[1]?.try(&.to_f.to_i) || 1
-
-      seq = Softepigen::Region.new io.read_line, seq_offset
+    FASTA.each(io) do |header, seq|
+      seq = Softepigen::Region.new seq, header.try(&.range.try(&.begin)) || 1
       forward_regions, reverse_regions = Softepigen.find_primers(seq, primer_size, kmer)
       amplicons.concat Softepigen.generate_amplicons(
         forward_regions, reverse_regions, amplicon_size, allowed_cpg)
