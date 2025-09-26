@@ -59,7 +59,8 @@ abort "error: FASTA file not found" unless File.exists?(path)
 amplicons = Softepigen.find_amplicons(path, primer_size, amplicon_size, allowed_cpg, kmer)
 
 if amplicons.size > 0
-  puts "Found #{amplicons.size} amplicon(s) in #{path}"
+  folded_amplicons = Softepigen.fold_amplicons(amplicons)
+  puts "Found #{folded_amplicons.size} amplicon(s) in #{path}"
 
   chr = "chr??"
   FASTA.each(path) do |header, seq|
@@ -68,7 +69,7 @@ if amplicons.size > 0
   end
   output ||= File.basename(path.stem, ".fasta") # sometimes ends in .fasta.txt
   Softepigen.write_csv "#{output}-out.csv", amplicons
-  Softepigen.write_bed "#{output}-out.bed", chr, Softepigen.fold_amplicons(amplicons)
+  Softepigen.write_bed "#{output}-out.bed", chr, folded_amplicons
   puts "Written amplicons to #{output}-out.csv and #{output}-out.bed"
 else
   puts "No amplicons found in #{path}."
