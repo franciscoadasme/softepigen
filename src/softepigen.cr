@@ -1,3 +1,4 @@
+require "compress/gzip"
 require "csv"
 require "./fasta"
 require "./softepigen/**"
@@ -47,9 +48,11 @@ module Softepigen
     allowed_cpg : Range(Int, Int) = 3..40,
     kmer : Int = 4,
   ) : Array(Amplicon)
-    File.open(path) do |io|
-      find_amplicons io, primer_size, amplicon_size, allowed_cpg, kmer
+    io = File.new(path)
+    if File.extname(path).in?(".gz", ".gzip")
+      io = Compress::Gzip::Reader.new(io, sync_close: true)
     end
+    find_amplicons(io, primer_size, amplicon_size, allowed_cpg, kmer) ensure io.close
   end
 
   def self.find_primers(

@@ -14,4 +14,11 @@ describe Softepigen do
       File.delete path
     end
   end
+
+  describe "#find_amplicons" do
+    it "works on gzipped" do
+      amplicons = Softepigen.find_amplicons "#{__DIR__}/data/chr1777777.fasta.gz"
+      amplicons.size.should eq 50
+    end
+  end
 end
