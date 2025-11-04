@@ -62,12 +62,7 @@ if amplicons.size > 0
   folded_amplicons = Softepigen.fold_amplicons(amplicons)
   puts "Found #{folded_amplicons.size} amplicon(s) in #{path}"
 
-  chr = "chr??"
-  File.open(path) do |io|
-    io.gets.try do |line|
-      chr = FASTA::Header.parse(line).name.downcase
-    end
-  end
+  chr = FASTA::Header.read(path).name.downcase
   output ||= File.basename(path.stem, ".fasta") # sometimes ends in .fasta.txt
   Softepigen.write_csv "#{output}-out.csv", amplicons
   Softepigen.write_bed "#{output}-out.bed", chr, folded_amplicons
