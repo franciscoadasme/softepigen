@@ -12,6 +12,14 @@ module FASTA
         Header.new "chr??", nil
       end
     end
+
+    def self.read(path : Path | String) : self
+      io = File.new path
+      if File.extname(path).in?(".gz", ".gzip")
+        io = Compress::Gzip::Reader.new(io, sync_close: true)
+      end
+      parse(io.read_line) ensure io.close
+    end
   end
 
   def self.each(io : IO, & : Header, String ->) : Nil

@@ -23,4 +23,14 @@ describe FASTA do
     end
     count.should eq 963
   end
+
+  it "reads header" do
+    header = FASTA::Header.read("#{__DIR__}/data/chr1777777.fasta")
+    header.name.should eq "chr1777777"
+  end
+
+  it "reads header from gzipped" do
+    header = FASTA::Header.read("#{__DIR__}/data/chr1777777.fasta.gz")
+    header.name.should eq "chr1777777"
+  end
 end
